@@ -18,6 +18,15 @@ function v4(options, buf, offset) {
   // Copy bytes to buffer, if provided
   if (buf) {
     offset = offset || 0;
+    // Only validate bounds for fixed-size typed arrays (Uint8Array, Buffer, etc.)
+    // Regular arrays can grow dynamically, so bounds checking is not needed
+    if (ArrayBuffer.isView(buf)) {
+      if (offset < 0 || offset + 16 > buf.length) {
+        throw new RangeError(
+          `UUID byte range ${offset}:${offset + 15} is out of buffer bounds`,
+        );
+      }
+    }
 
     for (let i = 0; i < 16; ++i) {
       buf[offset + i] = rnds[i];

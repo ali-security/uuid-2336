@@ -18,6 +18,20 @@ function v1(options, buf, offset) {
   let i = (buf && offset) || 0;
   const b = buf || new Array(16);
 
+  if (buf) {
+    offset = offset || 0;
+    // Only validate bounds for fixed-size typed arrays (Uint8Array, Buffer, etc.)
+    // Regular arrays can grow dynamically, so bounds checking is not needed
+    if (ArrayBuffer.isView(buf)) {
+      if (offset < 0 || offset + 16 > buf.length) {
+        throw new RangeError(
+          `UUID byte range ${offset}:${offset + 15} is out of buffer bounds`,
+        );
+      }
+    }
+    i = offset;
+  }
+
   options = options || {};
   let node = options.node || _nodeId;
   let clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
